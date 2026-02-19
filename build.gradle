@@ -1,0 +1,158 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.fichedecontrole'
+version = '1.0'
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Logging
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
+
+    // Tests
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testImplementation 'org.mockito:mockito-core:5.8.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.8.0'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+}
+
+application {
+    mainClass = 'com.fichedecontrole.Main'
+}
+
+// Configuration des tests
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+// Tâche pour créer un JAR exécutable avec toutes les dépendances
+tasks.register('fatJar', Jar) {
+    archiveBaseName = 'FicheDeControle'
+    archiveVersion = ''
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes 'Main-Class': 'com.fichedecontrole.Main'
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    // Inclure les resources
+    from('src/main/resources') {
+        include '**/*'
+    }
+
+    with jar
+}
+
+// Tâche pour créer le package de déploiement
+tasks.register('deployPackage') {
+    dependsOn fatJar
+
+    doLast {
+        def deployDir = file("$buildDir/deploy")
+        def configDir = file("$deployDir/config")
+        def templatesDir = file("$deployDir/templates")
+        def logsDir = file("$deployDir/logs")
+        def docsDir = file("$deployDir/docs")
+
+        // Créer la structure
+        deployDir.mkdirs()
+        configDir.mkdirs()
+        templatesDir.mkdirs()
+        logsDir.mkdirs()
+        docsDir.mkdirs()
+
+        // Copier le JAR
+        copy {
+            from file("$buildDir/libs/FicheDeControle.jar")
+            into deployDir
+        }
+
+        // Copier les fichiers .bat
+        copy {
+            from projectDir
+            include 'Lancer.bat'
+            into deployDir
+        }
+
+        // Copier la configuration
+        copy {
+            from file("src/main/resources/application.properties")
+            into configDir
+        }
+
+        // Copier le template
+        copy {
+            from file("src/main/resources/templates/modele.docx")
+            into templatesDir
+        }
+
+        // Copier la documentation
+        copy {
+            from projectDir
+            include '*.md'
+            into docsDir
+        }
+
+        // Créer un fichier .gitignore dans logs/
+        file("$logsDir/.gitignore").text = "*\n!.gitignore\n"
+
+        println ""
+        println "========================================="
+        println "  📦 Package de déploiement créé !"
+        println "========================================="
+        println "Emplacement : $deployDir"
+        println ""
+        println "Structure :"
+        println "  ├── FicheDeControle.jar"
+        println "  ├── Lancer.bat"
+        println "  ├── config/"
+        println "  │   └── application.properties"
+        println "  ├── templates/"
+        println "  │   └── modele.docx"
+        println "  ├── logs/"
+        println "  └── docs/"
+        println ""
+    }
+}
+
+// Tâche pour créer le ZIP de distribution
+tasks.register('packageZip', Zip) {
+    dependsOn 'deployPackage'
+
+    archiveBaseName = 'FicheDeControle'
+    archiveVersion = project.version.toString()
+    destinationDirectory = file("$buildDir/distributions")
+
+    from("$buildDir/deploy") {
+        into 'FicheDeControle'
+    }
+}
+
+// Lancer packageZip automatiquement après le build
+tasks.named('build') {
+    finalizedBy 'packageZip'
+}
+
+// Configuration pour l'encodage
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+// Tâche par défaut
+defaultTasks 'fatJar'

@@ -1,0 +1,46 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE - IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# IDE - Eclipse
+.classpath
+.project
+.settings/
+
+# IDE - VS Code (conserver les settings partagés si besoin)
+.vscode/
+
+# Compiled
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Répertoires de sortie
+bin/
+out/
+target/
+
+# Fichiers temporaires Java
+hs_err_pid*.log
+replay_pid*.log
+
+# Fichiers Word générés (conserver le template source)
+*.docx
+!src/main/resources/**/*.docx

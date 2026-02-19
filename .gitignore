@@ -17,6 +17,9 @@ build/
 # IDE - VS Code (conserver les settings partagés si besoin)
 .vscode/
 
+# Claude Code
+.claude/
+
 # Compiled
 *.class
 *.jar

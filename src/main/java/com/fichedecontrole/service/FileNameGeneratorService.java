@@ -31,7 +31,7 @@ public class FileNameGeneratorService {
             if (!pc.isEmpty()) {
                 // Limiter à MAX_PC_LENGTH caractères
                 if (pc.length() > MAX_PC_LENGTH) {
-                    pc = pc.substring(0, MAX_PC_LENGTH);
+                    pc = pc.substring(0, Math.min(MAX_PC_LENGTH, pc.length()));
                 }
                 if (i > 0) nom.append(" ");
                 nom.append(pc);

@@ -10,10 +10,9 @@ class ConfigManagerTest {
 
     @Test
     void testGetList_shouldReturnArray() {
-        String[] result = ConfigManager.getList("nature.demande");
+        String[] result = ConfigManager.getList("formule");
         assertThat(result).isNotEmpty();
-        // Vérifier que le premier élément contient "PG+PC" (évite les problèmes d'encodage UTF-8)
-        assertThat(result[0]).contains("PG+PC");
+        assertThat(result[0]).isEqualTo("TPSS");
     }
 
     @Test
@@ -24,7 +23,7 @@ class ConfigManagerTest {
 
     @Test
     void testGetValue_existingKey_shouldReturnValue() {
-        String result = ConfigManager.getValue("commentaire.sans.parametrage");
+        String result = ConfigManager.getValue("parametreur.0");
         assertThat(result).isNotNull().isNotEmpty();
     }
 

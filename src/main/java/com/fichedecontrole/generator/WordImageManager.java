@@ -1,6 +1,8 @@
 package com.fichedecontrole.generator;
 
 import com.fichedecontrole.model.CaptureCategory;
+import com.fichedecontrole.model.FicheDto;
+import com.fichedecontrole.model.NatureDemande;
 import com.fichedecontrole.model.ScreenCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 public class WordImageManager {
 
     private static final Logger logger = LoggerFactory.getLogger(WordImageManager.class);
+
+    private static final int MAX_PC_LENGTH = 8;
 
     // La largeur cible est maintenant définie par catégorie dans CaptureCategory (en EMU)
 
@@ -108,7 +112,9 @@ public class WordImageManager {
      * @param produitsCibles  les Produits Ciblés (PC1, PC2, PC3…) dans l'ordre de saisie
      * @return le XML modifié avec les images insérées
      */
-    public String replaceCaptureTags(String xml, String[] produitsCibles) {
+    public String replaceCaptureTags(String xml, FicheDto fiche) {
+        String[] produitsCibles = fiche.getListePC() != null ? fiche.getListePC() : new String[0];
+
         // Regrouper les images par catégorie
         Map<CaptureCategory, List<ImageEntry>> imagesByCategory = imageEntries.stream()
             .collect(Collectors.groupingBy(e -> e.category, LinkedHashMap::new, Collectors.toList()));
@@ -144,14 +150,17 @@ public class WordImageManager {
                         drawingXml.append("<w:p/>");
                     }
 
+                    NatureDemande nature = fiche.getNatureDemande();
+                    boolean isModification = nature == NatureDemande.MODIFICATION;
+
                     // Pour Taux de chargement Pléiade
-                    if ((category == CaptureCategory.TX_CHGT_PLEIADE 
+                    if (isModification && (category == CaptureCategory.TX_CHGT_PLEIADE 
                             || category == CaptureCategory.COTISATIONS_PLEIADE) 
                         && i == 0) {
                         drawingXml.append("<w:p><w:r><w:t>")
                                   .append(escapeXml("Avant :"))
                                   .append("</w:t></w:r></w:p>");
-                    } else if (category == CaptureCategory.TX_CHGT_PLEIADE && i == 1) {
+                    } else if (isModification && category == CaptureCategory.TX_CHGT_PLEIADE && i == 1) {
                         drawingXml.append("<w:p><w:r><w:t>")
                                   .append(escapeXml("Après :"))
                                   .append("</w:t></w:r></w:p>");
@@ -162,6 +171,7 @@ public class WordImageManager {
                             && produitsCibles != null && i < produitsCibles.length) {
                         String pc = produitsCibles[i] != null ? produitsCibles[i].trim() : "";
                         if (!pc.isEmpty()) {
+                            pc = pc.substring(0, Math.min(MAX_PC_LENGTH, pc.length()));
                             drawingXml.append("<w:p><w:r><w:t>")
                                       .append(escapeXml(pc))
                                       .append("</w:t></w:r></w:p>");

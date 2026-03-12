@@ -2,6 +2,7 @@ package com.fichedecontrole.generator;
 
 import com.fichedecontrole.config.ConfigManager;
 import com.fichedecontrole.model.CaptureCategory;
+import com.fichedecontrole.model.ElementPleiade;
 import com.fichedecontrole.model.FicheDto;
 import com.fichedecontrole.model.NatureDemande;
 import com.fichedecontrole.model.TypeDemande;
@@ -34,6 +35,9 @@ public class WordGeneratorXML {
     // Clés pour les équipes prestation
     private static final String CONFIG_PRESTATION_SANTE = "commentaire.prestation.sante";
     private static final String CONFIG_PRESTATION_PREV = "commentaire.prestation.prev";
+
+    private static final String CONFIG_PRESTATION_FERMETURE_PC = "commentaire.fermeture.pc";
+    private static final String CONFIG_PRESTATION_FERMETURE_RG = "commentaire.fermeture.rg";
 
     private static final Logger logger = LoggerFactory.getLogger(WordGeneratorXML.class);
     private static final String TEMPLATE_PATH = "/templates/modele.docx";
@@ -91,6 +95,7 @@ public class WordGeneratorXML {
                         String sep = (fiche.getNatureDemande() == NatureDemande.CREATION) ? "+" : " / ";
                         natureDemande += " " + String.join(sep, elements);
                     }
+                    
                     xml = remplacerBalise(xml, "NATURE_DEMANDE", natureDemande);
                     xml = remplacerBalise(xml, "DATE_DU_JOUR", dateJour);
                     xml = remplacerBalise(xml, "DATE_EFFET", fiche.getDateEffet());
@@ -103,6 +108,13 @@ public class WordGeneratorXML {
                     xml = remplacerBalise(xml, "STRUCTURE2", fiche.getStructure2());
                     xml = remplacerBalise(xml, "STRUCTURE", fiche.getStructure());
                     xml = remplacerBalise(xml, "TYPE_DEMANDE", fiche.getTypeDemande().getDisplayName());
+
+                    if (fiche.getListePC().length == 1) {
+                        xml = remplacerBalise(xml, "LISTE_PCS", ConfigManager.getValue("commentaire.liste.pc.seul"));
+                    } else if (fiche.getListePC().length > 1) {
+                        xml = remplacerBalise(xml, "LISTE_PCS", ConfigManager.getValue("commentaire.liste.pc.multiple"));
+                    }
+
                     xml = remplacerBalise(xml, "RISQUE", fiche.getRisque().getDisplayName());
                     xml = remplacerBalise(xml, "ACTION", fiche.getNatureDemande().getLibelle());
                     
@@ -121,12 +133,20 @@ public class WordGeneratorXML {
                             )
                             : "";
 
+                    String fermeturePc = (nature == NatureDemande.MODIFICATION 
+                        && fiche.getElements().contains(ElementPleiade.FERMETURE_PC.getDisplayName()))
+                        ? ConfigManager.getValue(CONFIG_PRESTATION_FERMETURE_PC)
+                        : "";
+
+                    String fermetureRg = (nature == NatureDemande.MODIFICATION 
+                        && fiche.getElements().contains(ElementPleiade.FERMETURE_RG.getDisplayName()))
+                        ? ConfigManager.getValue(CONFIG_PRESTATION_FERMETURE_RG)
+                        : "";
+                    
                     xml = remplacerBalise(xml, "OPERATION", operation);
                     xml = remplacerBalise(xml, "EQUIPE_PRESTATION", prestation);
-
-                    
-                    // TODO : Faire Fermeture RG
-                    xml = remplacerBalise(xml, "FERMETURE_RG", "");
+                    xml = remplacerBalise(xml, "FERMETURE_PC", fermeturePc);
+                    xml = remplacerBalise(xml, "FERMETURE_RG", fermetureRg);
 
                     String aucunParametrage = (nature == NatureDemande.AUCUN)
                         ? ConfigManager.getValue(CONFIG_COMMENT_NO_PARAMS)
@@ -143,7 +163,7 @@ public class WordGeneratorXML {
                     xml = remplacerBalise(xml, "PC3", pc3);
                     
                     // Insérer les captures d'écran ou supprimer les tags {{CAPTURES_XXX}}
-                    xml = imageManager.replaceCaptureTags(xml, fiche.getListePC());
+                    xml = imageManager.replaceCaptureTags(xml, fiche);
 
                     // Nettoyer les tags de capture fragmentés par Word
                     // (replaceCaptureTags gère les tags non-fragmentés,
@@ -310,7 +330,7 @@ public class WordGeneratorXML {
         String pattern = "{{" + tag + "}}";
 
         if (valeurEchappee.isEmpty()) {
-            xml = supprimerParagrapheContenant(xml, pattern);
+            xml = supprimerParagrapheContenant(xml, pattern); 
         } else {
             xml = remplacerPatternSimple(xml, pattern, valeurEchappee);
         }

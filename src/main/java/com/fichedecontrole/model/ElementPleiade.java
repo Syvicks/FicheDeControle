@@ -11,6 +11,8 @@ public enum ElementPleiade {
     TX_CHGT("Tx Chgt", "Taux de Chargement", false),
     DISPO("Dispo", "Dispositif", false),
     CJ("CJ", "Contrat Juridique", false),
+    FERMETURE_PC("Fermeture PC", "Fermeture PC", false),
+    FERMETURE_RG("Fermeture RG", "Fermeture RG", false),
     AUTRE("Autre", "Autre", false);
 
     private final String displayName;

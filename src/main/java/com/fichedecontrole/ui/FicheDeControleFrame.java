@@ -65,6 +65,8 @@ public class FicheDeControleFrame extends JFrame {
     private JCheckBox chkTxChgt;
     private JCheckBox chkDispo;
     private JCheckBox chkCJ;
+    private JCheckBox chkFermeturePC;
+    private JCheckBox chkFermetureRG;
     private JCheckBox chkAutre;
     private JPanel pnlElements;             // conteneur affiché/masqué selon la nature
     private JPanel pnlElementsCreation;     // groupe PG / PC / RG  (séparateur "+")
@@ -274,12 +276,16 @@ public class FicheDeControleFrame extends JFrame {
         chkTxChgt  = new JCheckBox(ElementPleiade.TX_CHGT.getLibelle());
         chkDispo   = new JCheckBox(ElementPleiade.DISPO.getLibelle());
         chkCJ      = new JCheckBox(ElementPleiade.CJ.getLibelle());
+        chkFermeturePC = new JCheckBox(ElementPleiade.FERMETURE_PC.getLibelle());
+        chkFermetureRG = new JCheckBox(ElementPleiade.FERMETURE_RG.getLibelle());
         chkAutre   = new JCheckBox(ElementPleiade.AUTRE.getLibelle());
         pnlElementsModification.add(chkFormule);
         pnlElementsModification.add(chkCotis);
         pnlElementsModification.add(chkTxChgt);
         pnlElementsModification.add(chkDispo);
         pnlElementsModification.add(chkCJ);
+        pnlElementsModification.add(chkFermeturePC);
+        pnlElementsModification.add(chkFermetureRG);
         pnlElementsModification.add(chkAutre);
         pnlElementsModification.setVisible(false); // caché car Création est sélectionnée par défaut
 
@@ -300,7 +306,8 @@ public class FicheDeControleFrame extends JFrame {
             if (isCreation) {
                 chkFormule.setSelected(false); chkCotis.setSelected(false);
                 chkTxChgt.setSelected(false);  chkDispo.setSelected(false);
-                chkCJ.setSelected(false);      chkAutre.setSelected(false);
+                chkCJ.setSelected(false);      chkFermeturePC.setSelected(false);
+                chkFermetureRG.setSelected(false); chkAutre.setSelected(false);
             } else if (isModif) {
                 chkPG.setSelected(false); chkPC.setSelected(false); chkRG.setSelected(false);
             }
@@ -318,9 +325,9 @@ public class FicheDeControleFrame extends JFrame {
         JPanel rightHalf2 = new JPanel(new GridBagLayout());
 
         txtDispositif = new JTextField();
-        setMaxLength(txtDispositif, 30);
+        setMaxLength(txtDispositif, 40);
         txtRaisonSociale = new JTextField();
-        setMaxLength(txtRaisonSociale, 30);
+        setMaxLength(txtRaisonSociale, 40);
         addToHalf(leftHalf2,  "Dispositif :",    txtDispositif,  0);
         addToHalf(rightHalf2, "Raison sociale :", txtRaisonSociale, 0);
 
@@ -616,6 +623,8 @@ public class FicheDeControleFrame extends JFrame {
             if (chkTxChgt.isSelected())  elements.add(ElementPleiade.TX_CHGT.getDisplayName());
             if (chkDispo.isSelected())   elements.add(ElementPleiade.DISPO.getDisplayName());
             if (chkCJ.isSelected())      elements.add(ElementPleiade.CJ.getDisplayName());
+            if (chkFermeturePC.isSelected()) elements.add(ElementPleiade.FERMETURE_PC.getDisplayName());
+            if (chkFermetureRG.isSelected()) elements.add(ElementPleiade.FERMETURE_RG.getDisplayName());
             if (chkAutre.isSelected())   elements.add(ElementPleiade.AUTRE.getDisplayName());
         }
 
@@ -743,7 +752,8 @@ public class FicheDeControleFrame extends JFrame {
         chkPG.setSelected(false); chkPC.setSelected(false); chkRG.setSelected(false);
         chkFormule.setSelected(false); chkCotis.setSelected(false);
         chkTxChgt.setSelected(false); chkDispo.setSelected(false);
-        chkCJ.setSelected(false); chkAutre.setSelected(false);
+        chkCJ.setSelected(false); chkFermeturePC.setSelected(false);
+        chkFermetureRG.setSelected(false); chkAutre.setSelected(false);
 
         // Revenir à l'état initial : Création sélectionnée → groupe PG/PC/RG visible
         pnlElements.setVisible(true);

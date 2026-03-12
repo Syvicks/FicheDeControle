@@ -147,12 +147,12 @@ class WordImageManagerTest {
         imageManager.prepareImages(List.of(capture));
         String xml = xmlAvecTag(CaptureCategory.TEST_ADHESION.getWordTag());
 
-        String result = imageManager.replaceCaptureTags(xml, new String[]{"TPSS01"});
+        String result = imageManager.replaceCaptureTags(xml, new String[]{"QU551001 - TEST"});
 
-        assertThat(result).contains("TPSS01");
+        assertThat(result).contains("QU551001");
         assertThat(result).contains("<w:drawing>");
         // Le nom PC doit apparaître AVANT le drawing
-        assertThat(result.indexOf("TPSS01")).isLessThan(result.indexOf("<w:drawing>"));
+        assertThat(result.indexOf("QU551001")).isLessThan(result.indexOf("<w:drawing>"));
     }
 
     @Test
